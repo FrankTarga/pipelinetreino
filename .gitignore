@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Data artifacts (local only, not versioned)
+data/raw/
+data/processed/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE configs
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
