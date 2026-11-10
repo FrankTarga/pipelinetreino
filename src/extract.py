@@ -7,10 +7,12 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from src.config import settings
+
 logger = logging.getLogger("pipeline.extract")
 
-DEFAULT_PAIRS: list[str] = ["USD-BRL", "EUR-BRL", "BTC-BRL"]
-BASE_URL: str = "https://economia.awesomeapi.com.br/json/last"
+DEFAULT_PAIRS: list[str] = settings.DEFAULT_PAIRS
+BASE_URL: str = settings.API_BASE_URL
 
 
 def _create_session(

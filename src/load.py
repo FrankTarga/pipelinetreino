@@ -6,13 +6,15 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.config import settings
+
 logger = logging.getLogger("pipeline.load")
 
-BASE_DATA_DIR = Path("data") / "processed"
-CSV_FILE_PATH = BASE_DATA_DIR / "quotes.csv"
-SQLITE_DB_PATH = BASE_DATA_DIR / "quotes.db"
-PARQUET_FILE_PATH = BASE_DATA_DIR / "quotes.parquet"
-TABLE_NAME = "quotes"
+BASE_DATA_DIR = settings.BASE_DATA_DIR
+CSV_FILE_PATH = settings.CSV_FILE_PATH
+SQLITE_DB_PATH = settings.SQLITE_DB_PATH
+PARQUET_FILE_PATH = settings.PARQUET_FILE_PATH
+TABLE_NAME = settings.TABLE_NAME
 KEY_COLUMNS = ["code", "code_in", "timestamp"]
 
 

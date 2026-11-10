@@ -16,3 +16,4 @@ COPY . .
 # Run the pipeline by default
 ENTRYPOINT ["python", "pipeline.py"]
 CMD ["--storage", "sqlite"]
+

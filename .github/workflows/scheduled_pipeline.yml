@@ -34,3 +34,4 @@ jobs:
           name: quotes-data
           path: data/processed/
           retention-days: 30
+
