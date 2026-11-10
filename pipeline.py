@@ -2,10 +2,9 @@ import argparse
 import logging
 import sys
 
-from src.extract import fetch_quotes, DEFAULT_PAIRS
-from src.transform import transform
+from src.extract import DEFAULT_PAIRS, fetch_quotes
 from src.load import load
-
+from src.transform import transform
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,9 +23,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--storage",
-        choices=["csv", "sqlite"],
+        choices=["csv", "sqlite", "parquet"],
         default="csv",
-        help="Formato de saida: 'csv' (padrão) ou 'sqlite'.",
+        help="Formato de saída: 'csv' (padrão), 'sqlite' ou 'parquet'.",
     )
     parser.add_argument(
         "--pairs",

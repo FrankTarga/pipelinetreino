@@ -1,6 +1,6 @@
 # simple-python-etl
 
-Pipeline ETL em Python puro consumindo cotações de moedas em tempo real via **AwesomeAPI**, transformando com **Pandas** e persistindo localmente em CSV ou SQLite.
+Pipeline ETL em Python puro consumindo cotações de moedas em tempo real via **AwesomeAPI**, transformando e validando com **Pandas** e persistindo localmente com idempotência em **CSV**, **SQLite** ou **Parquet**.
 
 ---
 
@@ -9,17 +9,19 @@ Pipeline ETL em Python puro consumindo cotações de moedas em tempo real via **
 ```
 simple-python-etl/
 ├── data/
-│   ├── raw/           # (ignorado pelo git) payloads brutos, se necessário
-│   └── processed/     # (ignorado pelo git) saídas do pipeline
+│   ├── raw/           # payloads brutos (ignorado pelo git)
+│   └── processed/     # saídas persistidas (CSV, SQLite, Parquet)
 ├── src/
 │   ├── __init__.py
-│   ├── extract.py     # Camada E — requisição HTTP + tratamento de erros
-│   ├── transform.py   # Camada T — limpeza, tipagem, snake_case
-│   └── load.py        # Camada L — append incremental CSV / SQLite
+│   ├── extract.py     # Camada E — requisição HTTP resiliente com retries e pooling
+│   ├── transform.py   # Camada T — limpeza, tipagem, validação de contratos e snake_case
+│   └── load.py        # Camada L — persistência idempotente (deduplicação e UPSERT)
+├── tests/
+│   └── test_pipeline.py # Testes unitários e de integração (pytest)
 ├── pipeline.py        # Orquestrador CLI do pipeline ETL
 ├── requirements.txt
 └── .gitignore
-
+```
 
 ## Schema de Saída
 
@@ -40,31 +42,62 @@ simple-python-etl/
 
 ---
 
-## Fluxo ETL
+## Fluxo ETL & Boas Práticas
 
 ```
 Trigger (CLI)
     │
     ▼
 [EXTRACT]  GET https://economia.awesomeapi.com.br/json/last/{pairs}
-    │         └── try/except: ConnectionError, Timeout, HTTPError
+    │         ├── Retry com Exponential Backoff (urllib3)
+    │         └── Timeouts explícitos e requests.Session
     ▼
 [TRANSFORM] JSON → pd.DataFrame
-    │         └── Rename colunas → snake_case
-    │         └── pd.to_numeric() → float
+    │         ├── Rename colunas → snake_case
+    │         ├── Validação de Contratos (preços > 0, chaves não nulas)
+    │         ├── pd.to_numeric() → float
     │         └── pd.to_datetime() → datetime UTC
-    │         └── Adiciona coluna extracted_at
     ▼
-[LOAD]     CSV (append incremental) ou SQLite (to_sql append)
-    │         └── os.makedirs(exist_ok=True)
-    │         └── header=False se arquivo já existe (CSV)
+[LOAD]     CSV, SQLite ou Parquet (Idempotência garantida)
+    │         ├── SQLite: PRIMARY KEY (code, code_in, timestamp) + INSERT OR REPLACE
+    │         ├── CSV: Deduplicação antes de append
+    │         └── Parquet: Deduplicação e compressão Snappy
     ▼
-  data/processed/quotes.csv  |  data/processed/quotes.db
+  data/processed/quotes.csv | quotes.db | quotes.parquet
+```
+
+---
+
+## Execução
+
+### 1. Instalar dependências
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Rodar o pipeline
+```bash
+# Formato padrão (CSV)
+python pipeline.py --storage csv
+
+# SQLite com UPSERT
+python pipeline.py --storage sqlite
+
+# Parquet colunar
+python pipeline.py --storage parquet
+
+# Pares customizados
+python pipeline.py --storage sqlite --pairs USD-BRL EUR-BRL GBP-BRL
+```
+
+### 3. Rodar os testes
+```bash
+pytest tests/
 ```
 
 ---
 
 ## API Utilizada
 
-AwesomeAPI — Cotações de Moedas
+AwesomeAPI — Cotações de Moedas (`https://economia.awesomeapi.com.br/json/last/`)
 

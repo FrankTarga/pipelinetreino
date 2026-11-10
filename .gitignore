@@ -11,8 +11,10 @@ venv/
 env/
 
 # Data artifacts (local only, not versioned)
-data/raw/
-data/processed/
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
 
 # OS artifacts
 .DS_Store
